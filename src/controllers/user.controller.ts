@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { GraphQLError } from 'graphql';
 import { IContext } from '../graphql';
 
@@ -7,6 +8,7 @@ interface IUser {
     name: string;
     email: string;
     profile: string;
+    password: string;
   };
 }
 
@@ -15,7 +17,7 @@ export const createUser = async (
   args: IUser,
   context: IContext
 ) => {
-  const { name, email, profile } = args.userdata;
+  const { name, email, profile, password } = args.userdata;
   const { prisma } = context;
 
   try {
@@ -24,6 +26,7 @@ export const createUser = async (
         name,
         email,
         profile,
+        password,
       },
     });
 
@@ -58,7 +61,7 @@ export const listUsers = async (
 
 export const getUser = async (
   _: unknown,
-  args: { email: string },
+  args: { id: string },
   context: IContext
 ) => {
   const { prisma } = context;
@@ -66,12 +69,16 @@ export const getUser = async (
   try {
     const user = await prisma.user.findFirst({
       where: {
-        email: args.email,
+        id: args.id,
       },
     });
 
     return user;
   } catch (error) {
-    console.log(error);
+    if (error instanceof PrismaClientKnownRequestError) {
+      return new GraphQLError(`User with id: ${args.id} does not exist`);
+    }
+
+    return new GraphQLError('User get error: unknown');
   }
 };
