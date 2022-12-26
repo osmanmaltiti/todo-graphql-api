@@ -1,5 +1,7 @@
 import {
+  completeActivity,
   createActivity,
+  deleteActivity,
   getActivity,
   listActivities,
 } from '../controllers/activity.controller';
@@ -8,6 +10,7 @@ import {
   createList,
   getList,
   getLists,
+  listCreated,
 } from './../controllers/list.controller';
 
 const resolvers = {
@@ -23,6 +26,14 @@ const resolvers = {
     createUser,
     createList,
     createActivity,
+    completeActivity,
+    deleteActivity,
+  },
+  Subscription: {
+    listCreated: {
+      subscribe: listCreated,
+      resolve: (payload: any) => console.log(payload),
+    },
   },
   User: {
     list: getLists,

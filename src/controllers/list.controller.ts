@@ -17,7 +17,7 @@ export const createList = async (
   context: IContext
 ) => {
   const { title, userId } = args.listdata;
-  const { prisma } = context;
+  const { prisma, pubSub } = context;
 
   try {
     const list = await prisma.list.create({
@@ -26,6 +26,11 @@ export const createList = async (
         userId,
       },
     });
+
+    pubSub.publish(
+      'listCreated',
+      `New list '${list.title}' with id '${list.id}' has been created`
+    );
 
     return list;
   } catch (error) {
@@ -87,4 +92,14 @@ export const getList = async (
 
     return new GraphQLError('List get error: unknown');
   }
+};
+
+export const listCreated = async (
+  _: unknown,
+  args: unknown,
+  context: IContext
+) => {
+  const { pubSub } = context;
+
+  return pubSub.subscribe('listCreated');
 };

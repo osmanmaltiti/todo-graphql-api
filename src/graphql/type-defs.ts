@@ -12,6 +12,12 @@ const typeDefs = `
     createUser(userdata: UserInput!): User
     createList(listdata: ListInput!): List
     createActivity(activitydata: ActivityInput!): Activity
+    completeActivity(id: String): Activity!
+    deleteActivity(id: String): [Activity]
+  }
+
+  type Subscription {
+    listCreated: String
   }
 
   type User {

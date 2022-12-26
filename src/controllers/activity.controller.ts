@@ -93,3 +93,56 @@ export const getActivity = async (
     });
   }
 };
+
+export const completeActivity = async (
+  _: unknown,
+  args: { id: string },
+  context: IContext
+) => {
+  const { id } = args;
+  const { prisma } = context;
+
+  try {
+    const activity = await prisma.activities.update({
+      where: { id },
+      data: { status: true },
+    });
+
+    return activity;
+  } catch (error) {
+    return throwError({
+      error,
+      errorMessage: 'Activity with id does not exist',
+      params: args.id,
+      defaultMessage: 'Complete activity error',
+    });
+  }
+};
+
+export const deleteActivity = async (
+  _: unknown,
+  args: { id: string },
+  context: IContext
+) => {
+  const { id } = args;
+  const { prisma } = context;
+
+  try {
+    const activity = await prisma.activities.delete({ where: { id } });
+
+    if (activity) {
+      const activities = await prisma.activities.findMany({
+        where: { listId: activity.listId },
+      });
+
+      return activities;
+    }
+  } catch (error) {
+    return throwError({
+      error,
+      errorMessage: 'Activity with id does not exist',
+      params: args.id,
+      defaultMessage: 'Delete activity error',
+    });
+  }
+};
